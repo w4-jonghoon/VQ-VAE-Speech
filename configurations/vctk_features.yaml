@@ -15,16 +15,16 @@ normalizer_path: '../data/vctk/vctk-mfcc-stats.pickle'
 use_speaker_conditioning: False
 record_codebook_stats: False
 record_gradient_stats: False
-features_path: 'features'
+features_path: 'spectrogram'
 export_one_hot_features: False
 
 # Cuda
 use_cuda: True
 use_data_parallel: False
-use_device: 
+use_device:
 
 # Audio
-sampling_rate: 16000 # Sampling rate
+sampling_rate: 22050 # Sampling rate
 res_type: 'kaiser_fast' # Resampling algorithm
 top_db: 20 # The threshold (in decibels) below reference to consider as silence
 length: 7680
@@ -62,14 +62,14 @@ residual_channels: 768
 num_residual_layers: 2
 
 # Features
-input_features_type: 'mfcc'
-output_features_type: 'mfcc'
-input_features_dim: 47
-input_features_filters: 13
-output_features_dim: 47
-output_features_filters: 13
-augment_input_features: True
-augment_output_features: True
+input_features_type: 'spectrogram'
+output_features_type: 'spectrogram'
+input_features_dim: 28
+input_features_filters: 1025
+output_features_dim: 28
+output_features_filters: 1025
+augment_input_features: False
+augment_output_features: False
 
 # Conv
 

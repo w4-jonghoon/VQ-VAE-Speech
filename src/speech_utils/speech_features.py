@@ -24,6 +24,7 @@
  #   SOFTWARE.                                                                       #
  #####################################################################################
 
+import librosa
 import numpy as np
 from python_speech_features.base import mfcc, logfbank
 from python_speech_features import delta
@@ -62,6 +63,47 @@ class SpeechFeatures(object):
                 logfbank_features,
                 d_logfbank_features,
                 a_logfbank_features
+            ),
+            axis=1
+        )
+        return concatenated_features
+
+    @staticmethod
+    def spectrogram(signal, rate=default_rate, filters_number=default_filters_number, augmented=default_augmented):
+        signal = signal.numpy()
+        length = signal.shape[2]
+        signal = signal.reshape((length,))
+        AUDIO_PARAMS = {
+            'audio_sample_rate': rate,
+            'audio_preemphasis': 0.97,
+            'audio_frame_length': 50.0,
+            'audio_frame_step': 12.5,
+            'audio_fft_length': 2048,
+            'audio_num_mel_bins': 80,
+            'audio_griffin_lim_num_iters': 50,
+            'audio_griffin_lim_pre_amp': 1.2,
+            'audio_max_db': 100,
+            'audio_ref_db': 20,
+        }
+        sample_rate = AUDIO_PARAMS['audio_sample_rate']
+        sr_kHz = sample_rate / 1000
+        hop_length = int(AUDIO_PARAMS['audio_frame_step'] * sr_kHz)
+        win_length = int(AUDIO_PARAMS['audio_frame_length'] * sr_kHz)
+
+        spectrogram_features = librosa.stft(signal,
+                                            AUDIO_PARAMS['audio_fft_length'],
+                                            hop_length,
+                                            win_length)
+        spectrogram_features = np.abs(spectrogram_features)  # (1+n_fft//2, T)
+        spectrogram_features = spectrogram_features.transpose()
+        if not augmented:
+            return spectrogram_features
+        d_spectrogram_features = delta(spectrogram_features, 2)
+        a_spectrogram_features = delta(d_spectrogram_features, 2)
+        concatenated_features = np.concatenate((
+                spectrogram_features,
+                d_spectrogram_features,
+                a_spectrogram_features
             ),
             axis=1
         )

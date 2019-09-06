@@ -113,7 +113,7 @@ class VCTKDataset(Dataset):
                 if interval.mark != 'sil':
                     break
                 detected_sil_duration += float(interval.maxTime) - float(interval.minTime)
- 
+
         audio, trimming_time = self._load_wav(
             wav_filename,
             self._sampling_rate,
