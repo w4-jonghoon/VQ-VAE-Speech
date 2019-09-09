@@ -62,7 +62,7 @@ class VCTK(Dataset):
         speaker_dic = {speaker: i for i, speaker in enumerate(speakers)}
         return speaker_dic
 
-    def __init__(self, root, downsample=True, transform=None, target_transform=None, download=True, dev_mode=False, ratio=0.8):
+    def __init__(self, root, downsample=True, transform=None, target_transform=None, download=False, dev_mode=False, ratio=0.8):
         super(VCTK, self).__init__()
 
         self.root = os.path.expanduser(root)
