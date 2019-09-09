@@ -68,7 +68,7 @@ input_features_dim: 28
 input_features_filters: 1025
 output_features_dim: 28
 output_features_filters: 1025
-augment_input_features: False
+augment_input_features: True
 augment_output_features: False
 
 # Conv

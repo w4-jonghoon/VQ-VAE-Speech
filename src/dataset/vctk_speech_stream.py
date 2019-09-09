@@ -118,7 +118,7 @@ class VCTKSpeechStream(object):
 
         def process(loader, output_dir, input_features_name, output_features_name,
             rate, input_filters_number, output_filters_number, input_target_shape,
-            augment_output_features, export_one_hot_features):
+            augment_input_features, augment_output_features, export_one_hot_features):
 
             initial_index = 0
             attempts = 10
@@ -146,7 +146,8 @@ class VCTKSpeechStream(object):
                             name=input_features_name,
                             signal=preprocessed_audio,
                             rate=rate,
-                            filters_number=input_filters_number
+                            filters_number=input_filters_number,
+                            augmented=augment_input_features
                         )
 
                         if input_features.shape[0] != input_target_shape[0] or input_features.shape[1] != input_target_shape[1]:
@@ -214,6 +215,7 @@ class VCTKSpeechStream(object):
                 input_filters_number=configuration['input_features_filters'],
                 output_filters_number=configuration['output_features_filters'],
                 input_target_shape=(configuration['input_features_dim'], configuration['input_features_filters'] * 3),
+                augment_input_features=configuration['augment_input_features'],
                 augment_output_features=configuration['augment_output_features'],
                 export_one_hot_features=configuration['export_one_hot_features']
             )
@@ -232,6 +234,7 @@ class VCTKSpeechStream(object):
                 input_filters_number=configuration['input_features_filters'],
                 output_filters_number=configuration['output_features_filters'],
                 input_target_shape=(configuration['input_features_dim'], configuration['input_features_filters'] * 3),
+                augment_input_features=configuration['augment_input_features'],
                 augment_output_features=configuration['augment_output_features'],
                 export_one_hot_features=configuration['export_one_hot_features']
             )
