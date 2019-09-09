@@ -85,8 +85,9 @@ if __name__ == "__main__":
     parser.add_argument('--plot_clustering_metrics_evolution', action='store_true', help='Compute the evolution of the clustering metrics accross different number of embedding vectors')
     parser.add_argument('--check_clustering_metrics_stability_over_seeds', action='store_true', help='Check the evolution of the clustering metrics statbility over different seed values')
     parser.add_argument('--plot_gradient_stats', action='store_true', help='Plot the gradient stats of the training')
+    parser.add_argument('--save_reproduced_target', action='store_true', help='Save the reproduced target')
     args = parser.parse_args()
-    
+
     evaluation_options = {
         'plot_comparaison_plot': args.plot_comparaison_plot,
         'plot_quantized_embedding_spaces': args.plot_quantized_embedding_spaces,
@@ -99,7 +100,8 @@ if __name__ == "__main__":
         'compute_groundtruth_average_phonemes_number': args.compute_groundtruth_average_phonemes_number,
         'plot_clustering_metrics_evolution': args.plot_clustering_metrics_evolution,
         'check_clustering_metrics_stability_over_seeds': args.check_clustering_metrics_stability_over_seeds,
-        'plot_gradient_stats': args.plot_gradient_stats
+        'plot_gradient_stats': args.plot_gradient_stats,
+        'save_reproduced_target': args.save_reproduced_target,
     }
 
     # If specified, print the summary of the model using the CPU device

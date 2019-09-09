@@ -39,6 +39,7 @@ import seaborn as sns
 import textgrid
 from tqdm import tqdm
 import pickle
+import librosa
 
 
 class Evaluator(object):
@@ -62,6 +63,9 @@ class Evaluator(object):
 
         if evaluation_options['plot_comparaison_plot']:
             self._compute_comparaison_plot(evaluation_entry)
+
+        if evaluation_options['save_reproduced_target']:
+            self._save_reproduced_target()
 
         if evaluation_options['plot_quantized_embedding_spaces']:
             EmbeddingSpaceStats.compute_and_plot_quantized_embedding_space_projections(
@@ -162,6 +166,50 @@ class Evaluator(object):
             'valid_reconstructions': valid_reconstructions
         }
 
+    def _save_reproduced_target(self):
+        with tqdm(self._data_stream.validation_loader) as bar:
+            for data in bar:
+                # filenames
+                utterence_key = data['wav_filename'][0][0].split('/')[-1].replace('.wav', '')
+
+                reproduced_input_file = self._results_path + os.sep + 'repr_{}_{}_input.wav'.format(utterence_key, self._experiment_name)
+                reproduced_output_file = self._results_path + os.sep + 'repr_{}_{}_output.wav'.format(utterence_key, self._experiment_name)
+
+                ConsoleLogger.status('reproduced_input_file: {}'.format(reproduced_input_file))
+                ConsoleLogger.status('reproduced_output_file: {}'.format(reproduced_output_file))
+
+                # fast-forward
+                valid_originals = data['input_features'].to(self._device).permute(0, 2, 1).contiguous().float()
+                speaker_ids = data['speaker_id'].to(self._device)
+
+                z = self._model.encoder(valid_originals)
+                z = self._model.pre_vq_conv(z)
+                _, quantized, _, _, _, _, _, \
+                    _, _, _, _ = self._model.vq(z)
+                valid_reconstructions = self._model.decoder(quantized, self._data_stream.speaker_dic, speaker_ids)
+
+                # save
+                valid_originals = valid_originals.detach().cpu().numpy().squeeze()
+                valid_originals = valid_originals[:1025]
+
+                sampling_rate = 22050
+                hop_length=275
+                win_length=1102
+
+                mag = np.abs(valid_originals)  # (1+n_fft//2, T)
+                wav = librosa.core.griffinlim(mag,
+                                            hop_length=hop_length,
+                                            win_length=win_length)
+                librosa.output.write_wav(reproduced_input_file, wav, sr=sampling_rate)
+
+                valid_reconstructions = valid_reconstructions.detach().cpu().numpy().squeeze()
+
+                mag = np.abs(valid_reconstructions)  # (1+n_fft//2, T)
+                wav = librosa.core.griffinlim(mag,
+                                            hop_length=hop_length,
+                                            win_length=win_length)
+                librosa.output.write_wav(reproduced_output_file, wav, sr=sampling_rate)
+
     def _compute_comparaison_plot(self, evaluation_entry):
         utterence_key = evaluation_entry['wav_filename'].split('/')[-1].replace('.wav', '')
         utterence = self._vctk.utterences[utterence_key].replace('\n', '')
@@ -171,7 +219,7 @@ class Evaluator(object):
         #tg = textgrid.TextGrid()
         #tg.read(phonemes_alignment_path)
         #for interval in tg.tiers[0]:
-    
+
         ConsoleLogger.status('Original utterence: {}'.format(utterence))
 
         if self._configuration['verbose']:
@@ -394,7 +442,7 @@ class Evaluator(object):
                     tokens_mapping[index] = list()
                 tokens_mapping[index].append((phoneme, indices.count(index) / len(indices)))
 
-        # Sort the probabilities for each token 
+        # Sort the probabilities for each token
         for index, distribution in tokens_mapping.items():
             tokens_mapping[index] = list(sorted(distribution, key = lambda x: x[1], reverse=True))
 
